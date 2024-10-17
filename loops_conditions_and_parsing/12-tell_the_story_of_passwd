@@ -1,12 +1,8 @@
 #!/usr/bin/env bash
-# This script displays the contents of the /etc/passwd file in a formatted story-like output.
+# displays a story with each line of /etc/passwd.
 
-# Set IFS to colon for parsing /etc/passwd entries
-IFS=:
-
-# Open /etc/passwd file for reading
-while read -r username password user_id group_id full_name home_directory shell; do
-  # Format the output as specified
-  echo "The user $username is part of the $group_id gang, lives in $home_directory and rides $shell. User $user_id's place is protected by the passcode $password, more info about the user here: $full_name."
-done < /etc/passwd
-
+input="/etc/passwd"
+while IFS=: read -r f1 f2 f3 f4 f5 f6 f7
+do
+    echo "The user $f1 is part of the $f4 gang, lives in $f6 and rides $f7. $f3's place is protected by the passcode $f2, more info about the user here: $f5"
+done < "$input"
