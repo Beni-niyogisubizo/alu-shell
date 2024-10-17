@@ -10,7 +10,7 @@ start() {
     fi
 
     # Start the daemon process
-    /path/to/manage_my_process.sh &  # Update with the actual path to your daemon script
+    /path/to/manage_my_process.sh &> /var/log/manage_my_process.log &  # Redirect output to a log file for debugging
     echo $! > "$PID_FILE"            # Save the PID of the background process
     echo "manage_my_process started"
 }
@@ -27,9 +27,9 @@ stop() {
 }
 
 restart() {
+    echo "manage_my_process restarted" # Moved the echo statement here
     stop                               # Stop the daemon first
     start                              # Start it again
-    echo "manage_my_process restarted"
 }
 
 case "$1" in
