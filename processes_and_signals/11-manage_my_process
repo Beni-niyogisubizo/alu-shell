@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-# This script manages the manage_my_process daemon.
+# This script manages the manage_my_process daemon by starting, stopping, or restarting it.
 
 PID_FILE="/var/run/my_process.pid"
+LOG_FILE="/var/log/manage_my_process.log"
 
 start() {
     if [ -f "$PID_FILE" ]; then
@@ -9,9 +10,10 @@ start() {
         exit 1
     fi
 
-    # Start the daemon process
-    /path/to/manage_my_process.sh &> /var/log/manage_my_process.log &  # Redirect output to a log file for debugging
-    echo $! > "$PID_FILE"            # Save the PID of the background process
+    # Start the daemon process and redirect stdout/stderr to a log file
+    /path/to/manage_my_process.sh &> "$LOG_FILE" &
+    
+    echo "$!" > "$PID_FILE"   # Save the PID of the background process
     echo "manage_my_process started"
 }
 
@@ -21,17 +23,23 @@ stop() {
         exit 1
     fi
 
-    kill $(cat "$PID_FILE")            # Terminate the daemon process
-    rm -f "$PID_FILE"                  # Remove the PID file
-    echo "manage_my_process stopped"
+    # Safely terminate the daemon process
+    if kill "$(cat "$PID_FILE")"; then
+        rm -f "$PID_FILE"      # Remove the PID file only if the process was killed
+        echo "manage_my_process stopped"
+    else
+        echo "Failed to stop manage_my_process."
+        exit 1
+    fi
 }
 
 restart() {
-    echo "manage_my_process restarted" # Moved the echo statement here
-    stop                               # Stop the daemon first
-    start                              # Start it again
+    echo "manage_my_process restarted"
+    stop                      # Stop the daemon first
+    start                     # Start it again
 }
 
+# Validate the argument passed to the script
 case "$1" in
     start)
         start
@@ -43,7 +51,8 @@ case "$1" in
         restart
         ;;
     *)
-        echo "Usage: manage_my_process {start|stop|restart}"
+        echo "Usage: $0 {start|stop|restart}"  # Ensure script name is dynamic
+        exit 1
         ;;
 esac
 
